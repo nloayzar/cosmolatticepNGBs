@@ -2,47 +2,36 @@
 
 # Output
 outputfile = ./
-print_headers = true
-overwriteFiles = false
-appendToFiles = false
+print_headers = false
+overwriteFiles = true
 
 # Evolution
 expansion = true
 fixedBackground = false
 evolver = RK2
-a0 = 1
 
 # Lattice
 N = 64
-kIR = 1
-dt = 0.01
+kIR = 0.7
+dt = 0.001
 
 # Times
-t0 = 0
-tMax = 100
+tMax = 10
 tOutputFreq = 1
-tOutputInfreq = 10
-tOutputRareFreq = 100
-tOutputVerb = 10
-tBackupFreq = -1
+tOutputInfreq = 2
 
 # Spectra options
 PS_type = 1
 PS_version = 1
-spectraVerbosity = 1
-deltaKBin = 1
-saveUnbinnedSpectra = false
 kCutOff = 2
 
 # Gravitational waves
 withGWs = false
-doLFforGWs = true
-GWprojectorType = 1
 
 # Initial conditions
 # Field order: phi h chi
-initial_amplitudes =
-initial_momenta =
+initial_amplitudes = 4.80234e18 0.0 0.0
+initial_momenta = -1.75455e31 0.0 0.0
 ICtype_S = Default
 
 # Optional external scalar power spectra
@@ -51,14 +40,14 @@ ext_PS1 = None
 ext_PS2 = None
 
 # Model parameters
-M =
-Lambda4 =
-lambda =
-sigma =
-massh =
-masspNGB =
+M = 1.2175e19
+Lambda4 = 5.47808e64
+lambda = 1e-11
+sigma = 1e-9
+lambdah = 1e-9
+masspNGB = 0.0
 
 # Scalar derivative coupling
 # Enabled coupling is (phi, chi), so this file expects one value.
 # Lambda = lambda_DerivativeCoupling * MPl / fStar.
-lambda_DerivativeCoupling =
+lambda_DerivativeCoupling = 1

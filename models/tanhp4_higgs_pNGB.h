@@ -26,8 +26,8 @@ namespace TempLat
   class MODELNAME : public Model<MODELNAME>
   {
   private:
-    double M, Lambda4, phii, omega, lambda, sigma, massh, masspNGB;
-    double lambdaRescaled, sigmaRescaled, masshRescaled, masspNGBRescaled;
+    double M, Lambda4, phii, omega, lambda, sigma, lambdah, masspNGB;
+    double lambdaRescaled, sigmaRescaled, lambdahRescaled, masspNGBRescaled;
 
   public:
     static constexpr size_t NDim = Model<MODELNAME>::NDim;
@@ -40,7 +40,7 @@ namespace TempLat
       Lambda4 = parser.get<double>("Lambda4");
       lambda = parser.get<double>("lambda");
       sigma = parser.get<double>("sigma");
-      massh = parser.get<double>("massh");
+      lambdah = parser.get<double>("lambdah");
       masspNGB = parser.get<double>("masspNGB");
 
       fldS0 = parser.get<double, 3>("initial_amplitudes");
@@ -55,7 +55,7 @@ namespace TempLat
 
       lambdaRescaled = lambda * pow<2>(fStar / omegaStar);
       sigmaRescaled = sigma * fStar / pow<2>(omegaStar);
-      masshRescaled = massh / omegaStar;
+      lambdahRescaled = lambdah * pow<2>(fStar / omegaStar);
       masspNGBRescaled = masspNGB / omegaStar;
 
       setInitialPotentialAndMassesFromPotential();
@@ -68,7 +68,7 @@ namespace TempLat
 
     auto potentialTerms(Tag<1>) // Higgs mass term.
     {
-      return 0.5 * pow<2>(masshRescaled) * pow<2>(fldS(1_c));
+      return 0.25 * lambdahRescaled * pow<4>(fldS(1_c));
     }
 
     auto potentialTerms(Tag<2>) // pNGB mass term.
@@ -91,7 +91,7 @@ namespace TempLat
 
     auto potDeriv(Tag<1>) // dV / dh.
     {
-      return pow<2>(masshRescaled) * fldS(1_c) + 2.0 * lambdaRescaled * pow<2>(fldS(0_c)) * fldS(1_c) +
+      return lambdahRescaled * pow<3>(fldS(1_c)) + 2.0 * lambdaRescaled * pow<2>(fldS(0_c)) * fldS(1_c) +
              2.0 * sigmaRescaled * fldS(0_c) * fldS(1_c);
     }
 
@@ -109,7 +109,7 @@ namespace TempLat
 
     auto potDeriv2(Tag<1>) // d^2 V / dh^2.
     {
-      return pow<2>(masshRescaled) + 2.0 * lambdaRescaled * pow<2>(fldS(0_c)) + 2.0 * sigmaRescaled * fldS(0_c);
+      return 3.0 * lambdahRescaled * pow<2>(fldS(1_c)) + 2.0 * lambdaRescaled * pow<2>(fldS(0_c)) + 2.0 * sigmaRescaled * fldS(0_c);
     }
 
     auto potDeriv2(Tag<2>) // d^2 V / dchi^2.
