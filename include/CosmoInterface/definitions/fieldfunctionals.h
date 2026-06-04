@@ -77,7 +77,7 @@ namespace TempLat
     template <class Model, int PHI, int CHI>
     static inline auto derivativeCouplingPi2S(Model &model, Tag<PHI> phi, Tag<CHI> chi)
     {
-      return model.fldS(phi) / (model.derivativeCouplings(phi, chi) * (Model::MPl / model.fStar)) *
+      return 2.0 * model.fldS(phi) / (model.derivativeCouplings(phi, chi) * (Model::MPl / model.fStar)) *
              FieldFunctionals::pi2S(model, chi);
     }
 
@@ -92,7 +92,7 @@ namespace TempLat
     template <class Model, int PHI, int CHI>
     static inline auto derivativeCouplingGrad2S(Model &model, Tag<PHI> phi, Tag<CHI> chi)
     {
-      return model.fldS(phi) / (model.derivativeCouplings(phi, chi) * (Model::MPl / model.fStar)) *
+      return 2.0 * model.fldS(phi) / (model.derivativeCouplings(phi, chi) * (Model::MPl / model.fStar)) *
              FieldFunctionals::grad2S(model, chi);
     }
 
