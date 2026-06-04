@@ -44,6 +44,16 @@ namespace TempLat
       return 0.5 * fldf * pow<-2>(model.aI);
     }
 
+    template <class Model, class T> static inline auto kineticDerivativeCouplingS(Model &model, T fldf)
+    { // scalar derivative coupling: phi / Lambda * pi_chi^2 contribution
+      return fldf * pow<-6>(model.aI);
+    }
+
+    template <class Model, class T> static inline auto gradientDerivativeCouplingS(Model &model, T fldf)
+    { // scalar derivative coupling: phi / Lambda * Grad[chi]^2 contribution
+      return fldf * pow<-2>(model.aI);
+    }
+
     template <class Model, class T> static inline auto kineticCS(Model &model, T fldf)
     { // complex scalar: kinetic energy
       return fldf * pow<-6>(model.aI);
@@ -96,6 +106,42 @@ namespace TempLat
     template <class Model> static inline auto kineticSSI(Model &model) { return kineticS(model, model.pi2AvSI); }
 
     template <class Model> static inline auto gradientSSI(Model &model) { return gradientS(model, model.grad2AvSI); }
+
+    template <class Model> static inline auto kineticDerivativeCouplingS(Model &model)
+    {
+      auto fldf = Total(phi, 0, Model::Ns - 1,
+                        Total(chi, 0, Model::Ns - 1,
+                              IfElse(Model::ScalarDerivativeCouplings::couples(phi, chi),
+                                     model.derivativeCouplingPi2AvI(phi * Model::Ns + chi), ZeroType());));
+      return kineticDerivativeCouplingS(model, fldf);
+    }
+
+    template <class Model> static inline auto gradientDerivativeCouplingS(Model &model)
+    {
+      auto fldf = Total(phi, 0, Model::Ns - 1,
+                        Total(chi, 0, Model::Ns - 1,
+                              IfElse(Model::ScalarDerivativeCouplings::couples(phi, chi),
+                                     model.derivativeCouplingGrad2AvI(phi * Model::Ns + chi), ZeroType());));
+      return gradientDerivativeCouplingS(model, fldf);
+    }
+
+    template <class Model> static inline auto kineticDerivativeCouplingSSI(Model &model)
+    {
+      auto fldf = Total(phi, 0, Model::Ns - 1,
+                        Total(chi, 0, Model::Ns - 1,
+                              IfElse(Model::ScalarDerivativeCouplings::couples(phi, chi),
+                                     model.derivativeCouplingPi2AvSI(phi * Model::Ns + chi), ZeroType());));
+      return kineticDerivativeCouplingS(model, fldf);
+    }
+
+    template <class Model> static inline auto gradientDerivativeCouplingSSI(Model &model)
+    {
+      auto fldf = Total(phi, 0, Model::Ns - 1,
+                        Total(chi, 0, Model::Ns - 1,
+                              IfElse(Model::ScalarDerivativeCouplings::couples(phi, chi),
+                                     model.derivativeCouplingGrad2AvSI(phi * Model::Ns + chi), ZeroType());));
+      return gradientDerivativeCouplingS(model, fldf);
+    }
 
     template <class Model> static inline auto kineticCS(Model &model) { return kineticCS(model, model.CSpi2AvI); }
 
@@ -188,8 +234,16 @@ namespace TempLat
       auto EmagU1 = (model.NU1 > 0 ? magneticU1(model) : 0);
       auto EelSU2 = (model.NSU2 > 0 ? electricSU2(model) : 0);
       auto EmagSU2 = (model.NSU2 > 0 ? magneticSU2(model) : 0);
+      auto EdcKs = [&]() {
+        if constexpr (Model::IsDerivativeCoupled) return kineticDerivativeCouplingS(model);
+        else return ZeroType();
+      }();
+      auto EdcGs = [&]() {
+        if constexpr (Model::IsDerivativeCoupled) return gradientDerivativeCouplingS(model);
+        else return ZeroType();
+      }();
 
-      return (Eks + Ekcs + EkSU2Dbl + Egs + Egcs + EgSU2Dbl + EelU1 + EmagU1 + EelSU2 + EmagSU2 +
+      return (Eks + Ekcs + EkSU2Dbl + EdcKs + Egs + Egcs + EgSU2Dbl + EdcGs + EelU1 + EmagU1 + EelSU2 + EmagSU2 +
               model.potAvI);
     }
 
@@ -206,8 +260,16 @@ namespace TempLat
       auto EmagU1 = (model.NU1 > 0 ? magneticU1(model) : 0);
       auto EelSU2 = (model.NSU2 > 0 ? electricSU2(model) : 0);
       auto EmagSU2 = (model.NSU2 > 0 ? magneticSU2(model) : 0);
+      auto EdcKs = [&]() {
+        if constexpr (Model::IsDerivativeCoupled) return kineticDerivativeCouplingS(model);
+        else return ZeroType();
+      }();
+      auto EdcGs = [&]() {
+        if constexpr (Model::IsDerivativeCoupled) return gradientDerivativeCouplingS(model);
+        else return ZeroType();
+      }();
 
-      return (Eks + Ekcs + EkSU2Dbl - 1.0/3.0 * (Egs + Egcs + EgSU2Dbl) +
+      return (Eks + Ekcs + EkSU2Dbl + EdcKs - 1.0/3.0 * (Egs + Egcs + EgSU2Dbl + EdcGs) +
               1.0/3.0 * (EelU1 + EmagU1 + EelSU2 + EmagSU2) - model.potAvI);
     }
 
@@ -224,13 +286,21 @@ namespace TempLat
       auto EmagU1 = (model.NU1 > 0 ? magneticU1(model) : 0);
       auto EelSU2 = (model.NSU2 > 0 ? electricSU2(model) : 0);
       auto EmagSU2 = (model.NSU2 > 0 ? magneticSU2(model) : 0);
+      auto EdcKs = [&]() {
+        if constexpr (Model::IsDerivativeCoupled) return kineticDerivativeCouplingS(model);
+        else return ZeroType();
+      }();
+      auto EdcGs = [&]() {
+        if constexpr (Model::IsDerivativeCoupled) return gradientDerivativeCouplingS(model);
+        else return ZeroType();
+      }();
 
       auto ENMC = [&]() {
         if constexpr (Model::IsNonMinimallyCoupled) return rhoNMCAv(model);
         else return ZeroType();
       }();
 
-      return (Eks + Ekcs + EkSU2Dbl + Egs + Egcs + EgSU2Dbl + EelU1 + EmagU1 + EelSU2 + EmagSU2 +
+      return (Eks + Ekcs + EkSU2Dbl + EdcKs + Egs + Egcs + EgSU2Dbl + EdcGs + EelU1 + EmagU1 + EelSU2 + EmagSU2 +
               ENMC + model.potAvI);
     }
 
@@ -242,6 +312,15 @@ namespace TempLat
       ForLoop(i, 0, Model::Ns -1,
               Etotal += kineticS(model, FieldFunctionals::pi2S(model,i));
               Etotal += gradientS(model, FieldFunctionals::grad2S(model,i));
+      );
+      ForLoop(phi, 0, Model::Ns - 1,
+              ForLoop(chi, 0, Model::Ns - 1,
+                      if constexpr (Model::ScalarDerivativeCouplings::couples(phi, chi)) {
+                        Etotal += kineticDerivativeCouplingS(
+                            model, FieldFunctionals::derivativeCouplingPi2S(model, phi, chi));
+                        Etotal += gradientDerivativeCouplingS(
+                            model, FieldFunctionals::derivativeCouplingGrad2S(model, phi, chi));
+                      });
       );
       ForLoop(i, 0, Model::NCs -1,
               Etotal += kineticCS(model, FieldFunctionals::pi2CS(model,i));

@@ -102,6 +102,7 @@ namespace TempLat
           if constexpr (Model::NSU2Doublet > 0) model.SU2DblPi2AvI = Averages::pi2SU2Doublet(model); // at t
           if constexpr (Model::NU1 > 0) model.U1pi2AvI = Averages::pi2U1(model);                     // at t
           if constexpr (Model::NSU2 > 0) model.SU2pi2AvI = Averages::pi2SU2(model);                  // at t
+          if constexpr (Model::IsDerivativeCoupled) Averages::setDerivativeCouplingPi2AveragesI(model);
           if (!fixedBackground)
             model.aDotI = model.aDotSI + model.dt / 2.0 * ScaleFactorKernels::get(model);
         }
@@ -247,6 +248,16 @@ namespace TempLat
         model.SU2pi2AvSI = Averages::pi2SU2(model);                     // at t+dt/2
         model.SU2pi2AvI = 0.5 * (model.SU2pi2AvSIM + model.SU2pi2AvSI); // at t (average)
       }
+      if constexpr (Model::IsDerivativeCoupled) {
+        model.derivativeCouplingPi2AvSIM = model.derivativeCouplingPi2AvSI;
+        Averages::setDerivativeCouplingPi2AveragesSI(model);
+        ForLoop(phi, 0, Model::Ns - 1,
+                ForLoop(chi, 0, Model::Ns - 1,
+                        model.derivativeCouplingPi2AvI(phi * Model::Ns + chi) =
+                            0.5 * (model.derivativeCouplingPi2AvSIM(phi * Model::Ns + chi) +
+                                   model.derivativeCouplingPi2AvSI(phi * Model::Ns + chi)););
+        );
+      }
     }
 
     template <class Model> void storeFieldsAverages(Model &model)
@@ -256,6 +267,7 @@ namespace TempLat
       if constexpr (Model::NSU2Doublet > 0) model.SU2DblGrad2AvI = Averages::grad2SU2Doublet(model); // at t
       if constexpr (Model::NU1 > 0) model.U1Mag2AvI = Averages::B2U1(model);                         // at t
       if constexpr (Model::NSU2 > 0) model.SU2Mag2AvI = Averages::B2SU2(model);                      // at t
+      if constexpr (Model::IsDerivativeCoupled) Averages::setDerivativeCouplingGrad2AveragesI(model);
       model.potAvI = average(Potential::potential(model));                                           // at t
     }
 

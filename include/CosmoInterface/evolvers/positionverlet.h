@@ -253,12 +253,24 @@ namespace TempLat
       if constexpr (Model::NSU2Doublet > 0) model.SU2DblPi2AvI = Averages::pi2SU2Doublet(model);
       if constexpr (Model::NU1 > 0) model.U1pi2AvI = Averages::pi2U1(model);
       if constexpr (Model::NSU2 > 0) model.SU2pi2AvI = Averages::pi2SU2(model);
+      if constexpr (Model::IsDerivativeCoupled) {
+        model.derivativeCouplingPi2AvIM = model.derivativeCouplingPi2AvI;
+        Averages::setDerivativeCouplingPi2AveragesI(model);
+      }
 
-       model.pi2AvSI = 0.5*(model.pi2AvI+model.pi2AvIM);
-       model.CSpi2AvSI = 0.5*(model.CSpi2AvI+model.CSpi2AvIM);
-       model.SU2DblPi2AvSI = 0.5*(model.SU2DblPi2AvI+model.SU2DblPi2AvIM);
-       model.U1pi2AvSI = 0.5*(model.U1pi2AvI+model.U1pi2AvIM);
-       model.SU2pi2AvSI = 0.5*(model.SU2pi2AvI+model.SU2pi2AvIM);
+      model.pi2AvSI = 0.5 * (model.pi2AvI + model.pi2AvIM);
+      model.CSpi2AvSI = 0.5 * (model.CSpi2AvI + model.CSpi2AvIM);
+      model.SU2DblPi2AvSI = 0.5 * (model.SU2DblPi2AvI + model.SU2DblPi2AvIM);
+      model.U1pi2AvSI = 0.5 * (model.U1pi2AvI + model.U1pi2AvIM);
+      model.SU2pi2AvSI = 0.5 * (model.SU2pi2AvI + model.SU2pi2AvIM);
+      if constexpr (Model::IsDerivativeCoupled) {
+        ForLoop(phi, 0, Model::Ns - 1,
+                ForLoop(chi, 0, Model::Ns - 1,
+                        model.derivativeCouplingPi2AvSI(phi * Model::Ns + chi) =
+                            0.5 * (model.derivativeCouplingPi2AvI(phi * Model::Ns + chi) +
+                                   model.derivativeCouplingPi2AvIM(phi * Model::Ns + chi)););
+        );
+      }
     }
 
     template <class Model> void storeFieldsAveragesHalf(Model &model)
@@ -268,6 +280,7 @@ namespace TempLat
       if constexpr (Model::NSU2Doublet > 0) model.SU2DblGrad2AvSI = Averages::grad2SU2Doublet(model);
       if constexpr (Model::NU1 > 0) model.U1Mag2AvSI = Averages::B2U1(model);
       if constexpr (Model::NSU2 > 0) model.SU2Mag2AvSI = Averages::B2SU2(model);
+      if constexpr (Model::IsDerivativeCoupled) Averages::setDerivativeCouplingGrad2AveragesSI(model);
       model.potAvSI = average(Potential::potential(model));
     }
 
@@ -279,6 +292,7 @@ namespace TempLat
       if constexpr (Model::NSU2Doublet > 0) model.SU2DblGrad2AvI = Averages::grad2SU2Doublet(model);
       if constexpr (Model::NU1 > 0) model.U1Mag2AvI = Averages::B2U1(model);
       if constexpr (Model::NSU2 > 0) model.SU2Mag2AvI = Averages::B2SU2(model);
+      if constexpr (Model::IsDerivativeCoupled) Averages::setDerivativeCouplingGrad2AveragesI(model);
       model.potAvI = average(Potential::potential(model));
     }
 

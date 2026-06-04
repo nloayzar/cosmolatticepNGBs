@@ -66,6 +66,36 @@ namespace TempLat
       return pow<2>(model.piS(i));
     }
 
+    /** @brief Returns phi / Lambda * pi_chi^2 for scalar derivative couplings.
+     *
+     * Lambda is the rescaled derivative-coupling strength, LambdaRescaled * MPl / fStar.
+     *
+     * @param model The model from which to extract the fields.
+     * @param phi The tag corresponding to the scalar field multiplying the derivative term.
+     * @param chi The tag corresponding to the derivative-coupled scalar field.
+     */
+    template <class Model, int PHI, int CHI>
+    static inline auto derivativeCouplingPi2S(Model &model, Tag<PHI> phi, Tag<CHI> chi)
+    {
+      return model.fldS(phi) / (model.derivativeCouplings(phi, chi) * (Model::MPl / model.fStar)) *
+             FieldFunctionals::pi2S(model, chi);
+    }
+
+    /** @brief Returns phi / Lambda * Grad[chi]^2 for scalar derivative couplings.
+     *
+     * Lambda is the rescaled derivative-coupling strength, LambdaRescaled * MPl / fStar.
+     *
+     * @param model The model from which to extract the fields.
+     * @param phi The tag corresponding to the scalar field multiplying the derivative term.
+     * @param chi The tag corresponding to the derivative-coupled scalar field.
+     */
+    template <class Model, int PHI, int CHI>
+    static inline auto derivativeCouplingGrad2S(Model &model, Tag<PHI> phi, Tag<CHI> chi)
+    {
+      return model.fldS(phi) / (model.derivativeCouplings(phi, chi) * (Model::MPl / model.fStar)) *
+             FieldFunctionals::grad2S(model, chi);
+    }
+
     // --> Complex scalar:
 
     /**

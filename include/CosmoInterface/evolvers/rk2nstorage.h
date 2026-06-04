@@ -84,8 +84,9 @@ namespace TempLat
     }
 
     bool deltaScaleFactor(Model &model, size_t i, KernelsTypes::EoM<Model> kt)
-    { 
+    {
       if (!fixedBackground) {
+        syncDerivativeCouplingScaleFactorAverages(model);
         if (i == 0) {
           deltaADot = dt * ScaleFactorKernels::get(model, kt);
           deltaA = dt * model.aDotI;
@@ -94,10 +95,18 @@ namespace TempLat
           deltaA = As[i] * deltaA + dt * model.aDotI;
         }
         return true;
-        }
-        return false;
+      }
+      return false;
     }
     template <class KernelType> bool deltaScaleFactor(Model &model, size_t i, KernelType) { return false; }
+
+    void syncDerivativeCouplingScaleFactorAverages(Model &model)
+    {
+      if constexpr (Model::IsDerivativeCoupled) {
+        Averages::setDerivativeCouplingPi2AveragesI(model);
+        Averages::setDerivativeCouplingGrad2AveragesI(model);
+      }
+    }
 
     void advanceScaleFactor(Model &model, size_t i, T tMinust0)
     {

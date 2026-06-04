@@ -63,6 +63,13 @@ namespace TempLat
       return (covPlus + covMinus - (2.0 * Model::NDim) * model.fldSU2Doublet(n)) / pow<2>(model.dx);
     }
 
+    //Product of the gradient of two scalar fields
+    template<class Model, int N, int M>
+    static auto GradientScalarProduct(Model& model, Tag<N> n, Tag<M> m)
+    {
+            return Total(i,1,Model::NDim, forwardGradient(model,n,i) * forwardGradient(model,m, i));
+    }
+
     // Forward gradients and forward covariant gradients
 
     template <class Model, int N, int I> static auto forwardGradient(Model &model, Tag<N> n, Tag<I> i)

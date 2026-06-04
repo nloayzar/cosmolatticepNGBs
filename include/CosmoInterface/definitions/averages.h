@@ -34,6 +34,70 @@ namespace TempLat
       return average(Total(i, 0, Model::Ns - 1, FieldFunctionals::pi2S(model, i)));
     }
 
+    template <class Model, int PHI, int CHI>
+    static inline auto derivativeCouplingPi2S(Model &model, Tag<PHI> phi, Tag<CHI> chi)
+    {
+      return average(FieldFunctionals::derivativeCouplingPi2S(model, phi, chi));
+    }
+
+    template <class Model, int PHI, int CHI>
+    static inline auto derivativeCouplingGrad2S(Model &model, Tag<PHI> phi, Tag<CHI> chi)
+    {
+      return average(FieldFunctionals::derivativeCouplingGrad2S(model, phi, chi));
+    }
+
+    template <class Model> static inline void setDerivativeCouplingPi2AveragesI(Model &model)
+    {
+      ForLoop(phi, 0, Model::Ns - 1,
+              ForLoop(chi, 0, Model::Ns - 1,
+                      if constexpr (Model::ScalarDerivativeCouplings::couples(phi, chi)) {
+                        model.derivativeCouplingPi2AvI(phi * Model::Ns + chi) =
+                            Averages::derivativeCouplingPi2S(model, phi, chi);
+                      } else {
+                        model.derivativeCouplingPi2AvI(phi * Model::Ns + chi) = 0;
+                      });
+      );
+    }
+
+    template <class Model> static inline void setDerivativeCouplingPi2AveragesSI(Model &model)
+    {
+      ForLoop(phi, 0, Model::Ns - 1,
+              ForLoop(chi, 0, Model::Ns - 1,
+                      if constexpr (Model::ScalarDerivativeCouplings::couples(phi, chi)) {
+                        model.derivativeCouplingPi2AvSI(phi * Model::Ns + chi) =
+                            Averages::derivativeCouplingPi2S(model, phi, chi);
+                      } else {
+                        model.derivativeCouplingPi2AvSI(phi * Model::Ns + chi) = 0;
+                      });
+      );
+    }
+
+    template <class Model> static inline void setDerivativeCouplingGrad2AveragesI(Model &model)
+    {
+      ForLoop(phi, 0, Model::Ns - 1,
+              ForLoop(chi, 0, Model::Ns - 1,
+                      if constexpr (Model::ScalarDerivativeCouplings::couples(phi, chi)) {
+                        model.derivativeCouplingGrad2AvI(phi * Model::Ns + chi) =
+                            Averages::derivativeCouplingGrad2S(model, phi, chi);
+                      } else {
+                        model.derivativeCouplingGrad2AvI(phi * Model::Ns + chi) = 0;
+                      });
+      );
+    }
+
+    template <class Model> static inline void setDerivativeCouplingGrad2AveragesSI(Model &model)
+    {
+      ForLoop(phi, 0, Model::Ns - 1,
+              ForLoop(chi, 0, Model::Ns - 1,
+                      if constexpr (Model::ScalarDerivativeCouplings::couples(phi, chi)) {
+                        model.derivativeCouplingGrad2AvSI(phi * Model::Ns + chi) =
+                            Averages::derivativeCouplingGrad2S(model, phi, chi);
+                      } else {
+                        model.derivativeCouplingGrad2AvSI(phi * Model::Ns + chi) = 0;
+                      });
+      );
+    }
+
     // --> Complex scalars:
 
     template <class Model> static inline auto grad2CS(Model &model) // <D_i[f]^2> (sum over i, fields)
@@ -125,6 +189,12 @@ namespace TempLat
 
                 model.fldPiAvSI(i) = average(model.fldS(i) * model.piS(i));
                 model.fldVpAvSI(i) = average(model.fldS(i) * Potential::derivS(model, i)););
+      }
+      if constexpr (Model::IsDerivativeCoupled) {
+        Averages::setDerivativeCouplingPi2AveragesI(model);
+        model.derivativeCouplingPi2AvSI = model.derivativeCouplingPi2AvI;
+        Averages::setDerivativeCouplingGrad2AveragesI(model);
+        model.derivativeCouplingGrad2AvSI = model.derivativeCouplingGrad2AvI;
       }
     }
   };

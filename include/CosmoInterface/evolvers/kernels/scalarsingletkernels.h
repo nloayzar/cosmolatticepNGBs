@@ -11,6 +11,7 @@
 #include "CosmoInterface/evolvers/kernels/kernelstypes.h"
 #include "TempLat/lattice/algebra/spatialderivatives/latticelaplacian.h"
 #include "CosmoInterface/definitions/axioncouplings.h"
+#include "CosmoInterface/definitions/derivativecouplings.h"
 
 namespace TempLat
 {
@@ -35,6 +36,7 @@ namespace TempLat
               pow(model.aI, 3 + model.alpha) *
                   (Potential::derivS(model, n) + IfElse(Model::NonMinimalCouplings::couples(Tag<N>(), Tag<0>()),
                                                         model.xis(n, 0_c) * model.fldS(n) * model.RI, ZeroType())) +
+              DerivativeCouplings::ScalarDerivativeSource(model, n) +
               pow<2>(model.omegaStar) / (model.fStar * Model::MPl) * pow(model.aI, model.alpha - 1) *
                   AxionCouplings::ScalarAxionSource(model, n, tMinust0));
     }

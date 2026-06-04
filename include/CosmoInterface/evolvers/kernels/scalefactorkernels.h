@@ -43,6 +43,8 @@ namespace TempLat
         T EelU1 = 0;
         T EmagSU2 = 0;
         T EelSU2 = 0;
+        T EdcKs = 0;
+        T EdcGs = 0;
 
         if constexpr (Model::Ns > 0) {
           Eks = Energies::kineticS(model);
@@ -64,6 +66,10 @@ namespace TempLat
           EelSU2 = Energies::electricSU2(model);
           EmagSU2 = Energies::magneticSU2(model);
         }
+        if constexpr (Model::IsDerivativeCoupled) {
+          EdcKs = Energies::kineticDerivativeCouplingS(model);
+          EdcGs = Energies::gradientDerivativeCouplingS(model);
+        }
         // For Axion U1: if system is evolved during linear regime Electric and Magnetic fields do not source the
         // expansion.
         double NonLinearSwitch = 1.0;
@@ -71,7 +77,8 @@ namespace TempLat
           NonLinearSwitch = (tMinust0 > model.tNonLinearAxionU1) ? 1.0 : 0.0;
 
         return pow(model.aI, 2 * model.alpha + 1) / 3.0 * pow<2>(model.fStar / Model::MPl) *
-               ((model.alpha - 2) * (Eks + Ekcs + EkSU2Dbl) + model.alpha * (Egs + Egcs + EgSU2Dbl) +
+               ((model.alpha - 2) * (Eks + Ekcs + EkSU2Dbl + EdcKs) +
+                model.alpha * (Egs + Egcs + EgSU2Dbl + EdcGs) +
                 (model.alpha - 1) * (NonLinearSwitch * (EelU1 + EmagU1) + EelSU2 + EmagSU2) +
                 (model.alpha + 1) * model.potAvI);
       } else {
@@ -95,6 +102,8 @@ namespace TempLat
       T EelU1 = 0;
       T EmagSU2 = 0;
       T EelSU2 = 0;
+      T EdcKs = 0;
+      T EdcGs = 0;
 
       if constexpr (Model::Ns > 0) {
         Eks = Energies::kineticSSI(model);  //  scalar singlet, kinetic energy
@@ -116,10 +125,15 @@ namespace TempLat
         EelSU2 = Energies::electricSU2SI(model);  // SU2 gauge fields, electric energy
         EmagSU2 = Energies::magneticSU2SI(model); // SU2 gauge fields, magnetic energy
       }
+      if constexpr (Model::IsDerivativeCoupled) {
+        EdcKs = Energies::kineticDerivativeCouplingSSI(model);
+        EdcGs = Energies::gradientDerivativeCouplingSSI(model);
+      }
 
       // Returns kernel for the scale factor:
       return pow(model.aI, 2 * model.alpha + 1) / 3.0 * pow<2>(model.fStar / Model::MPl) *
-             ((model.alpha - 2) * (Eks + Ekcs + EkSU2Dbl) + model.alpha * (Egs + Egcs + EgSU2Dbl) +
+             ((model.alpha - 2) * (Eks + Ekcs + EkSU2Dbl + EdcKs) +
+              model.alpha * (Egs + Egcs + EgSU2Dbl + EdcGs) +
               (model.alpha - 1) * (EelU1 + EmagU1 + EelSU2 + EmagSU2) + (model.alpha + 1) * model.potAvSI);
     }
 

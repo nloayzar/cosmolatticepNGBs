@@ -241,6 +241,7 @@ namespace TempLat
       if constexpr (Model::NSU2Doublet > 0) model.SU2DblPi2AvI = Averages::pi2SU2Doublet(model);
       if constexpr (Model::NU1 > 0) model.U1pi2AvI = Averages::pi2U1(model);
       if constexpr (Model::NSU2 > 0) model.SU2pi2AvI = Averages::pi2SU2(model);
+      if constexpr (Model::IsDerivativeCoupled) Averages::setDerivativeCouplingPi2AveragesI(model);
     }
 
     template <class Model> void storeFieldsAverages(Model &model)
@@ -250,6 +251,7 @@ namespace TempLat
       if constexpr (Model::NSU2Doublet > 0) model.SU2DblGrad2AvI = Averages::grad2SU2Doublet(model);
       if constexpr (Model::NU1 > 0) model.U1Mag2AvI = Averages::B2U1(model);
       if constexpr (Model::NSU2 > 0) model.SU2Mag2AvI = Averages::B2SU2(model);
+      if constexpr (Model::IsDerivativeCoupled) Averages::setDerivativeCouplingGrad2AveragesI(model);
       model.potAvI = average(Potential::potential(model));
     }
 

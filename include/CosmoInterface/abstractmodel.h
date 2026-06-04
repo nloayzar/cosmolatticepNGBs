@@ -17,6 +17,7 @@
 #include "CosmoInterface/abstractmodel/complexscalarbase.h"
 #include "CosmoInterface/abstractmodel/su2doubletbase.h"
 #include "CosmoInterface/abstractmodel/scalaru1axionbase.h"
+#include "CosmoInterface/abstractmodel/scalarderivativecouplingbase.h"
 #include "CosmoInterface/abstractmodel/nonminimalcouplingbase.h"
 #include "CosmoInterface/abstractmodel/scalefactorbase.h"
 #include "CosmoInterface/abstractmodel/modelparametersbase.h"
@@ -55,6 +56,7 @@ namespace TempLat
     using SU2DoubletU1Couplings = CouplingsManager<NSU2Doublet, NU1Flds>;   // couplings U(1) gauge-SU2 doublet
     using SU2DoubletSU2Couplings = CouplingsManager<NSU2Doublet, NSU2Flds>; // couplings SU(2) gauge-SU2 doublet
     using ScalarU1AxionCouplings = CouplingsManager<NScalars, NU1Flds>;     // couplings U(1) gauge-scalar axion
+    using ScalarDerivativeCouplings = CouplingsManager<NScalars, NScalars>; // derivative couplings between scalars.
     using NonMinimalCouplings = CouplingsManager<NScalars, 1>; // Non-minimal coupling to gravity of scalars.
   };
 
@@ -69,8 +71,8 @@ namespace TempLat
   _ModelName, _ModelParsType::NPotTerms, _ModelParsType::NScalars, _ModelParsType::NCScalars, _ModelParsType::NU1Flds, \
       _ModelParsType::NSU2Doublet, _ModelParsType::NSU2Flds, typename _ModelParsType::CsU1Couplings,                   \
       typename _ModelParsType::SU2DoubletU1Couplings, typename _ModelParsType::SU2DoubletSU2Couplings,                 \
-      typename _ModelParsType::ScalarU1AxionCouplings, typename _ModelParsType::NonMinimalCouplings, _FloatType,       \
-      _ModelParsType::NDim
+      typename _ModelParsType::ScalarU1AxionCouplings, typename _ModelParsType::ScalarDerivativeCouplings,             \
+      typename _ModelParsType::NonMinimalCouplings, _FloatType, _ModelParsType::NDim
 #define MakeModelFloatType(_ModelName, _ModelParsType, _FloatType)                                                     \
   AbstractModel<MakeAbstractModelTemplateArgs(_ModelName, _ModelParsType, _FloatType)>
 #define MakeModel(_ModelName, _ModelParsType)                                                                          \
@@ -82,12 +84,14 @@ namespace TempLat
    **/
   template <class R, size_t NPOTTERMS, size_t NS, size_t NC, size_t NU1FLDS, size_t NSU2DOUBLET, size_t NSU2FLDS,
             typename CSU1COUPLINGS, typename SU2DOUBLETU1COUPLINGS, typename SU2DOUBLETSU2COUPLINGS,
-            typename SCALARU1AXIONCOUPLINGS, typename NONMINCOUPLINGS, typename T = double, int NDIM = 3>
+            typename SCALARU1AXIONCOUPLINGS, typename SCALARDERIVATIVECOUPLINGS, typename NONMINCOUPLINGS,
+            typename T = double, int NDIM = 3>
   class AbstractModel
       : public ScalarBase<NDIM, T, NS>,
         public ComplexScalarBase<NDIM, T, NC, CSU1COUPLINGS>,
         public SU2DoubletSectorBase<NDIM, T, NSU2DOUBLET, SU2DOUBLETU1COUPLINGS, SU2DOUBLETSU2COUPLINGS>,
         public ScalarU1AxionBase<T, SCALARU1AXIONCOUPLINGS>,
+        public ScalarDerivativeCouplingBase<T, NS, SCALARDERIVATIVECOUPLINGS>,
         public NonMinimalCouplingBase<T, NS, NONMINCOUPLINGS>,
         public ScaleFactorBase<T>,
         public ModelParametersBase<T>,
@@ -147,7 +151,9 @@ namespace TempLat
           ComplexScalarBase<NDIM, T, NC, CSU1COUPLINGS>(parser, toolBox, par),
           SU2DoubletSectorBase<NDIM, T, NSU2DOUBLET, SU2DOUBLETU1COUPLINGS, SU2DOUBLETSU2COUPLINGS>(parser, toolBox,
                                                                                                     par),
-          ScalarU1AxionBase<T, SCALARU1AXIONCOUPLINGS>(parser), NonMinimalCouplingBase<T, NS, NONMINCOUPLINGS>(parser),
+          ScalarU1AxionBase<T, SCALARU1AXIONCOUPLINGS>(parser),
+          ScalarDerivativeCouplingBase<T, NS, SCALARDERIVATIVECOUPLINGS>(parser),
+          NonMinimalCouplingBase<T, NS, NONMINCOUPLINGS>(parser),
           ScaleFactorBase<T>(), ModelParametersBase<T>(par, pDt, std::move(pName)),
           GWBase<NDIM, T>(parser, toolBox, par),
           U1Base<NDIM, T, NU1FLDS, NS, NC, SCALARU1AXIONCOUPLINGS>(toolBox, par),
