@@ -67,7 +67,13 @@ namespace TempLat
     template<class Model, int N, int M>
     static auto GradientScalarProduct(Model& model, Tag<N> n, Tag<M> m)
     {
-            return Total(i,1,Model::NDim, forwardGradient(model,n,i) * forwardGradient(model,m, i));
+            return Total(i,1,Model::NDim, CenteredGradientScalarProduct(model,n,m,i));
+    }
+
+    template<class Model, int N, int M, int I>
+    static auto CenteredGradientScalarProduct(Model& model, Tag<N> n, Tag<M> m, Tag<I> i)
+    {
+            return 0.5 * (backwarGradient(model,n,i) * backwarGradient(model,m, i) + forwardGradient(model,n,i) * forwardGradient(model,m, i));
     }
 
     // Forward gradients and forward covariant gradients
@@ -76,6 +82,12 @@ namespace TempLat
     {
       return (shift<I>(model.fldS(n)) - model.fldS(n)) / model.dx;
     }
+
+    template <class Model, int N, int I> static auto backwarGradient(Model &model, Tag<N> n, Tag<I> i)
+    {
+      return (-shift<-I>(model.fldS(n)) + model.fldS(n)) / model.dx;
+    }
+
 
     template <class Model, int N, int I> static auto forwardCovGradientCS(Model &model, Tag<N> n, Tag<I> i)
     {
