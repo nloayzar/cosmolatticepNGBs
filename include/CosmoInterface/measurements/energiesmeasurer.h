@@ -80,6 +80,22 @@ namespace TempLat
               Etot += Ekin + Egrad; // add to total energy
               energies.addAverage(Ekin); energies.addAverage(Egrad););
 
+      // Scalar derivative couplings
+      if constexpr (Model::IsDerivativeCoupled) {
+        ForLoop(phi, 0, Model::Ns - 1,
+                ForLoop(chi, 0, Model::Ns - 1,
+                        if constexpr (Model::ScalarDerivativeCouplings::couples(phi, chi)) {
+                          Ekin = average(Energies::kineticDerivativeCouplingS(
+                              model, FieldFunctionals::derivativeCouplingPi2S(model, phi, chi)));
+                          Egrad = average(Energies::gradientDerivativeCouplingS(
+                              model, FieldFunctionals::derivativeCouplingGrad2S(model, phi, chi)));
+                          Etot += Ekin + Egrad;
+                          energies.addAverage(Ekin);
+                          energies.addAverage(Egrad);
+                        });
+        );
+      }
+
       // Potential
       T potTerm = 0;
       ForLoop(i, 0, Model::NPotTerms - 1, potTerm = average(model.potentialTerms(i)); energies.addAverage(potTerm);
@@ -132,6 +148,17 @@ namespace TempLat
       ForLoop(i, 0, Model::NU1 - 1, ret.emplace_back("E^kin_U1" + std::to_string(i));
               ret.emplace_back("E^grad_U1" + std::to_string(i)););
       ForLoop(i, 0, Model::NSU2 - 1, ret.emplace_back("E^kin_SU2"); ret.emplace_back("E^grad_SU2"););
+      if constexpr (Model::IsDerivativeCoupled) {
+        ForLoop(phi, 0, Model::Ns - 1,
+                ForLoop(chi, 0, Model::Ns - 1,
+                        if constexpr (Model::ScalarDerivativeCouplings::couples(phi, chi)) {
+                          ret.emplace_back("E^kin_deriv_scal" + std::to_string(phi) + "_scal" +
+                                           std::to_string(chi));
+                          ret.emplace_back("E^grad_deriv_scal" + std::to_string(phi) + "_scal" +
+                                           std::to_string(chi));
+                        });
+        );
+      }
       ForLoop(i, 0, Model::NPotTerms - 1, ret.emplace_back("Vpot_term_" + std::to_string(i)););
 
       if constexpr (Model::IsNonMinimallyCoupled) {
