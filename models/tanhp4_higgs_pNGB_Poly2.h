@@ -1,5 +1,5 @@
-#ifndef TANHP4_HIGGS_PNGB_H
-#define TANHP4_HIGGS_PNGB_H
+#ifndef TANHP4_HIGGS_PNGB_POLY2_H
+#define TANHP4_HIGGS_PNGB_POLY2_H
 
 /* This file is part of CosmoLattice, available at www.cosmolattice.net .
    Copyright Daniel G. Figueroa, Adrien Florio, Francisco Torrenti and Wessel Valkenburg.
@@ -19,7 +19,7 @@ namespace TempLat
         CouplingsManager<NScalars, NScalars, false, false, true, false, false, false, false, false, false>;
   };
 
-#define MODELNAME tanhp4_higgs_pNGB
+#define MODELNAME tanhp4_higgs_pNGB_Poly2
 
   template <class R> using Model = MakeModel(R, ModelPars);
 
@@ -64,18 +64,18 @@ namespace TempLat
       setInitialPotentialAndMassesFromPotential();
     }
 
-    auto derivativeCouplingFunction(Tag<0>, Tag<2>) // f(phi) for f(phi) * (D chi)^2.
+    auto derivativeCouplingFunction(Tag<0>, Tag<2>) // f(phi) = phi / Lambda + (phi / Lambda)^2.
     {
-      throw(ScalarDerivativeCouplingFunctionNotDefined(
-          "Specify derivativeCouplingFunction(Tag<0>, Tag<2>) in tanhp4_higgs_pNGB before evolving the model."));
-      return ZeroType();
+      auto Lambda = derivativeCouplings(0_c, 2_c) * (Model<MODELNAME>::MPl / fStar);
+      auto phiOverLambda = fldS(0_c) / Lambda;
+      return phiOverLambda + pow<2>(phiOverLambda);
     }
 
     auto derivativeCouplingFunctionDeriv(Tag<0>, Tag<2>) // df / dphi.
     {
-      throw(ScalarDerivativeCouplingFunctionNotDefined(
-          "Specify derivativeCouplingFunctionDeriv(Tag<0>, Tag<2>) in tanhp4_higgs_pNGB before evolving the model."));
-      return ZeroType();
+      auto Lambda = derivativeCouplings(0_c, 2_c) * (Model<MODELNAME>::MPl / fStar);
+      auto phiOverLambda = fldS(0_c) / Lambda;
+      return (1.0 + 2.0 * phiOverLambda) / Lambda;
     }
 
     auto potentialTerms(Tag<0>) // Inflaton tanh^4 potential.
@@ -126,7 +126,8 @@ namespace TempLat
 
     auto potDeriv2(Tag<1>) // d^2 V / dh^2.
     {
-      return 3.0 * lambdahRescaled * pow<2>(fldS(1_c)) + 2.0 * lambdaRescaled * pow<2>(fldS(0_c)) + 2.0 * sigmaRescaled * fldS(0_c);
+      return 3.0 * lambdahRescaled * pow<2>(fldS(1_c)) + 2.0 * lambdaRescaled * pow<2>(fldS(0_c)) +
+             2.0 * sigmaRescaled * fldS(0_c);
     }
 
     auto potDeriv2(Tag<2>) // d^2 V / dchi^2.
@@ -136,4 +137,4 @@ namespace TempLat
   };
 } // namespace TempLat
 
-#endif // TANHP4_HIGGS_PNGB_H
+#endif // TANHP4_HIGGS_PNGB_POLY2_H

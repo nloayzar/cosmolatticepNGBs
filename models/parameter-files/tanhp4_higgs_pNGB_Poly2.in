@@ -1,7 +1,7 @@
-# Parameter file for tanhp4_higgs_pNGB
+# Parameter file for tanhp4_higgs_pNGB_Poly2
 
 # Output
-outputfile = ./dt0p001/
+outputfile = ./test_poly2/
 print_headers = false
 overwriteFiles = true
 

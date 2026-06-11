@@ -12,6 +12,7 @@
 namespace TempLat {
 
 MakeException(PotentialDerivativeNotDefined);
+MakeException(ScalarDerivativeCouplingFunctionNotDefined);
 
 } // namespace TempLat
 

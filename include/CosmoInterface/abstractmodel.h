@@ -145,6 +145,20 @@ namespace TempLat
     // Initial potential
     T pot0, pot0SI;
 
+    // Scalar derivative-coupling hooks. The function returned here is the dimensionless
+    // coefficient f(phi) in f(phi) * (D chi)^2. The default preserves the legacy
+    // interaction f(phi) = phi / Lambda.
+    template <int PHI, int CHI> auto derivativeCouplingFunction(Tag<PHI> phi, Tag<CHI> chi)
+    {
+      return this->fldS(phi) /
+             (this->derivativeCouplings(phi, chi) * (ScaleFactorBase<T>::MPl / this->fStar));
+    }
+
+    template <int PHI, int CHI> auto derivativeCouplingFunctionDeriv(Tag<PHI> phi, Tag<CHI> chi)
+    {
+      return 1.0 / (this->derivativeCouplings(phi, chi) * (ScaleFactorBase<T>::MPl / this->fStar));
+    }
+
     AbstractModel(ParameterParser &parser, const LatticeParameters<T> &par,
                   device::memory::host_ptr<MemoryToolBox<NDIM>> toolBox, T pDt, std::string pName = "")
         : ScalarBase<NDIM, T, NS>(parser, toolBox, par),

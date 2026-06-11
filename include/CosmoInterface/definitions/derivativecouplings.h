@@ -25,28 +25,34 @@ namespace TempLat
 
     template <class Model, int N> static auto ScalarDerivativeSourceInf(Model &model, Tag<N> n)
     {
-      // Contributions where field n is the prefactor phi in phi * D_mu chi D^mu chi.
+      // Contributions where field n is the prefactor phi in f(phi) * D_mu chi D^mu chi.
       auto sourceFromPrefactorField =
           Total(chi, 0, Model::Ns - 1,
                 IfElse(Model::ScalarDerivativeCouplings::couples(n, chi),
-                       1.0 / (model.derivativeCouplings(n, chi) * (Model::MPl/model.fStar)) 
-                       * (pow(model.aI,model.alpha-3)* FieldFunctionals::pi2S(model,chi)
-                       - pow(model.aI,model.alpha+1) * FieldFunctionals::grad2S(model,chi) ) , ZeroType()));
-      
+                       model.derivativeCouplingFunctionDeriv(n, chi) *
+                           (pow(model.aI, model.alpha - 3) * FieldFunctionals::pi2S(model, chi) -
+                            pow(model.aI, model.alpha + 1) * FieldFunctionals::grad2S(model, chi)),
+                       ZeroType()));
+
       return sourceFromPrefactorField;
     }
 
     template <class Model, int N> static auto ScalarDerivativeSourcepNGB(Model &model, Tag<N> n)
     {
-      // Contributions where field n is the differentiated scalar chi in phi * D_mu chi D^mu chi.
+      // Contributions where field n is the differentiated scalar chi in f(phi) * D_mu chi D^mu chi.
       auto sourceFromDerivativeField =
           Total(phi, 0, Model::Ns - 1,
                 IfElse(Model::ScalarDerivativeCouplings::couples(phi, n),
-                      - 2.0 /(model.derivativeCouplings(phi, n)*(Model::MPl/model.fStar) + 2.0 * model.fldS(phi)) * (pow(model.aI,model.alpha-3) * model.piS(n) * model.piS(phi) - pow(model.aI,model.alpha+1) * GaugeDerivatives::GradientScalarProduct(model,n,phi)) 
-                      - 1.0 /(1.0 + 2.0 * model.fldS(phi)/(model.derivativeCouplings(phi, n)*(Model::MPl/model.fStar))) * pow(model.aI,model.alpha+3) * Potential::derivS(model, n) 
-                      + pow(model.aI,model.alpha+3) * Potential::derivS(model, n), ZeroType()));
+                       -2.0 * model.derivativeCouplingFunctionDeriv(phi, n) /
+                               (1.0 + 2.0 * model.derivativeCouplingFunction(phi, n)) *
+                           (pow(model.aI, model.alpha - 3) * model.piS(n) * model.piS(phi) -
+                            pow(model.aI, model.alpha + 1) * GaugeDerivatives::GradientScalarProduct(model, n, phi)) 
+                           - 1.0 / (1.0 + 2.0 * model.derivativeCouplingFunction(phi, n)) *
+                               pow(model.aI, model.alpha + 3) * Potential::derivS(model, n) +
+                           pow(model.aI, model.alpha + 3) * Potential::derivS(model, n),
+                       ZeroType()));
 
-       return sourceFromDerivativeField;
+      return sourceFromDerivativeField;
     }
   };
 
