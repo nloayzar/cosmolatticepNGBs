@@ -1,7 +1,7 @@
 # Parameter file for tanhp4_higgs_pNGB_Poly2
 
 # Output
-outputfile = ./test_poly2/
+outputfile = ./
 print_headers = false
 overwriteFiles = true
 
@@ -51,5 +51,4 @@ masspNGB = 0.0
 # Scalar derivative coupling
 # Enabled coupling is (phi, chi), so this file expects one value.
 # The value is available to model-defined derivativeCouplingFunction hooks.
-# The current tanhp4_higgs_pNGB hooks intentionally throw until f(phi) and df/dphi are specified.
 lambda_DerivativeCoupling = 1

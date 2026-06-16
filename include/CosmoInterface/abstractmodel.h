@@ -218,6 +218,38 @@ namespace TempLat
 
     template <int N> auto getFluctuationRatio(Tag<N>) { return OneType(); }
 
+    template <int CHI> T scalarFluctuationKineticPrefactor(Tag<CHI> chi)
+    {
+      T ret = 1.0;
+      if constexpr (SCALARDERIVATIVECOUPLINGS::howManyCouples() > 0) {
+        this->addInitValueOnePoint();
+        device::IdxArray<NDIM> pos0{{}};
+        ForLoop(phi, 0, NS - 1, if constexpr (SCALARDERIVATIVECOUPLINGS::couples(phi, chi)) {
+          ret += 2.0 * device::memory::getAtOnePoint(
+                           static_cast<R &>(*this).derivativeCouplingFunction(phi, chi), pos0);
+        });
+        this->removeInitValue();
+      }
+      return ret;
+    }
+
+    template <int CHI> T scalarFluctuationKineticPrefactorLogDeriv(Tag<CHI> chi)
+    {
+      T kPrime = 0.0;
+      if constexpr (SCALARDERIVATIVECOUPLINGS::howManyCouples() > 0) {
+        this->addInitValueOnePoint();
+        device::IdxArray<NDIM> pos0{{}};
+        ForLoop(phi, 0, NS - 1, if constexpr (SCALARDERIVATIVECOUPLINGS::couples(phi, chi)) {
+          const auto fDeriv =
+              device::memory::getAtOnePoint(static_cast<R &>(*this).derivativeCouplingFunctionDeriv(phi, chi), pos0);
+          const auto phiPrime = this->piS0(phi) / this->fStar / this->omegaStar;
+          kPrime += 2.0 * fDeriv * phiPrime;
+        });
+        this->removeInitValue();
+      }
+      return kPrime / scalarFluctuationKineticPrefactor(chi);
+    }
+
     // The "MemoryToolBox" is a shared variable between most instances of the program. It contains many useful
     // informations about
     // the intrinsic parameter of the library. Sometimes, some of the classes need the MemoryToolBox to be created. This

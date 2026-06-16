@@ -1,7 +1,7 @@
 # Parameter file for tanhp4_higgs_pNGB
 
 # Output
-outputfile = ./dt0p001/
+outputfile = ./
 print_headers = false
 overwriteFiles = true
 
@@ -11,12 +11,12 @@ fixedBackground = false
 evolver = RK2
 
 # Lattice
-N = 64
+N = 128
 kIR = 0.25
-dt = 0.001
+dt = 0.005
 
 # Times
-tMax = 10
+tMax = 40
 tOutputFreq = 1
 tOutputInfreq = 2
 
@@ -52,4 +52,4 @@ masspNGB = 0.0
 # Enabled coupling is (phi, chi), so this file expects one value.
 # The value is available to model-defined derivativeCouplingFunction hooks.
 # The current tanhp4_higgs_pNGB hooks intentionally throw until f(phi) and df/dphi are specified.
-lambda_DerivativeCoupling = 1
+lambda_DerivativeCoupling = 0.1

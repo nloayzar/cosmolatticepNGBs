@@ -73,7 +73,8 @@ namespace TempLat
       ForLoop(i, 0, Model::Ns - 1, {
         auto &s = model.extPS[i];
         if (s == Constants::defaultString || s.empty() || s == "None" || s == "none") {
-          fg.conjugateGaussianFluctuations(model, model.fldS(i), model.piS(i), model.masses2S[i], model.aDotI, rPar.kCutoff);
+          fg.conjugateGaussianFluctuations(model, model.fldS(i), model.piS(i), model.masses2S[i], model.aDotI,
+                                           rPar.kCutoff, i);
         } else {
           extps.conjugateGaussianInputFluctuations(model, model.fldS(i), model.piS(i), s, rPar.kCutoff, rPar.powerSpectrumType);
         }

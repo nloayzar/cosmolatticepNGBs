@@ -38,6 +38,18 @@ namespace TempLat
     // (called from u1initializer.h and su2initializer.h).
     template <class Model> auto getFluctuationsNorm(Model &model, Field<T, Model::NDim> f, T mass2, T kCutOff) const
     {
+      return getFluctuationsNorm(model, f, mass2, kCutOff, 1.0);
+    }
+
+    template <class Model, int N>
+    auto getFluctuationsNorm(Model &model, Field<T, Model::NDim> f, T mass2, T kCutOff, Tag<N> n) const
+    {
+      return getFluctuationsNorm(model, f, mass2, kCutOff, model.scalarFluctuationKineticPrefactor(n));
+    }
+
+    template <class Model, class K>
+    auto getFluctuationsNorm(Model &model, Field<T, Model::NDim> f, T mass2, T kCutOff, K kineticPrefactor) const
+    {
       FourierSite<Model::NDim> ntilde(f.getToolBox());
       // Fourier lattice site, see eq.(57) of arXiv:2006.15122v2
       auto k = ntilde.norm() * f.getKIR();
@@ -52,11 +64,11 @@ namespace TempLat
       // (see Sec. 7.1. of arXiv:2006.15122 for a derivation)
 
       if constexpr (Model::NDim == 1)
-        return Hcut * (model.omegaStar / model.fStar * pow(lSide / pow<2>(f.getDx()),.5)) * pow(2 * omega, -0.5) / sqrt(4.*Constants::pi<T>) ;
+        return Hcut * (model.omegaStar / model.fStar * pow(lSide / pow<2>(f.getDx()),.5)) * pow(2 * omega * kineticPrefactor, -0.5) / sqrt(4.*Constants::pi<T>) ;
       else if constexpr (Model::NDim == 2)
-          return Hcut * (model.omegaStar / model.fStar * (lSide / pow<2>(f.getDx()))) * pow(2 * omega, -0.5) / sqrt(2.*Constants::pi<T>) ;
+          return Hcut * (model.omegaStar / model.fStar * (lSide / pow<2>(f.getDx()))) * pow(2 * omega * kineticPrefactor, -0.5) / sqrt(2.*Constants::pi<T>) ;
       else
-          return Hcut  * (model.omegaStar / model.fStar * pow(lSide / pow<2>(f.getDx()), 1.5)) * pow(2 * omega, -0.5) / sqrt(2) ;
+          return Hcut  * (model.omegaStar / model.fStar * pow(lSide / pow<2>(f.getDx()), 1.5)) * pow(2 * omega * kineticPrefactor, -0.5) / sqrt(2) ;
 
       // Here 1/sqrt{2omega_k} characterises rms of |phi_k|, but since |phi_k|^2 =
       //  Re(phi_k)^2 + Im(phi_k)^2, hence there is extra 1/sqrt{2} as this 'return' is
@@ -71,6 +83,15 @@ namespace TempLat
       auto fFluctuationNorm = getFluctuationsNorm(model, f, mass2, kCutOff); // norm
       return fFluctuationNorm * RandomGaussianField<T, Model::NDim>(baseSeed + mySeed + f.toString(),
                                                                     f.getToolBox()); // baseSeed is given in input file
+    }
+
+    template <class Model, int N>
+    auto getNormedFluctuations(Model &model, Field<T, Model::NDim> f, T mass2, std::string mySeed, T kCutOff,
+                               Tag<N> n) const
+    {
+      auto fFluctuationNorm = getFluctuationsNorm(model, f, mass2, kCutOff, n);
+      return fFluctuationNorm * RandomGaussianField<T, Model::NDim>(baseSeed + mySeed + f.toString(),
+                                                                    f.getToolBox());
     }
 
     // Sums left-moving and right-moving waves, both following a Gaussian distribution
@@ -106,6 +127,25 @@ namespace TempLat
       p.inFourierSpace() = Constants::I<T> * omega * (fLeft - fRight) / sqrt(2) -
                            aDot * f.inFourierSpace(); // derived in Sec. 7.1. of arXiv:2006.15122
       p.inFourierSpace().setZeroMode(0);              // sets the zero mode to 0
+    }
+
+    template <class Model, int N>
+    void conjugateGaussianFluctuations(Model &model, Field<T, Model::NDim> f, Field<T, Model::NDim> p, T mass2, T aDot,
+                                       T kCutOff, Tag<N> n) const
+    {
+      auto fLeft = getNormedFluctuations(model, f, mass2, "Random left", kCutOff, n);
+      auto fRight = getNormedFluctuations(model, f, mass2, "Random right", kCutOff, n);
+
+      f.inFourierSpace() = (fLeft + fRight) / sqrt(2);
+      f.inFourierSpace().setZeroMode(0);
+
+      FourierSite<Model::NDim> ntilde(f.getToolBox());
+      auto k = ntilde.norm() * f.getKIR();
+      auto omega = omega_k(k, mass2, f.toString());
+
+      p.inFourierSpace() = Constants::I<T> * omega * (fLeft - fRight) / sqrt(2) -
+                           (aDot + 0.5 * model.scalarFluctuationKineticPrefactorLogDeriv(n)) * f.inFourierSpace();
+      p.inFourierSpace().setZeroMode(0);
     }
 
     std::string getBaseSeed() const { return baseSeed; }
