@@ -46,12 +46,12 @@ namespace TempLat
 
     template <class Model, class T> static inline auto kineticDerivativeCouplingS(Model &model, T fldf)
     { // scalar derivative coupling: 2 * f(phi) * pi_chi^2 contribution
-      return fldf * pow<-6>(model.aI);
+      return 0.5 * fldf * pow<-6>(model.aI);
     }
 
     template <class Model, class T> static inline auto gradientDerivativeCouplingS(Model &model, T fldf)
     { // scalar derivative coupling: 2 * f(phi) * Grad[chi]^2 contribution
-      return fldf * pow<-2>(model.aI);
+      return 0.5 * fldf * pow<-2>(model.aI);
     }
 
     template <class Model, class T> static inline auto kineticCS(Model &model, T fldf)
