@@ -1,7 +1,7 @@
-# Parameter file for tanhp4_higgs_pNGB_Poly2
+# Parameter file for tanhp2_higgs_pNGB_Poly2
 
 # Output
-outputfile = ./test_InftyLambda/
+outputfile = ./
 print_headers = false
 overwriteFiles = true
 
@@ -11,12 +11,12 @@ fixedBackground = false
 evolver = RK2
 
 # Lattice
-N = 64
+N = 256
 kIR = 0.25
-dt = 0.0001
+dt = 0.001
 
 # Times
-tMax = 40
+tMax = 300
 tOutputFreq = .1
 tOutputInfreq = 2
 
@@ -31,8 +31,8 @@ withGWs = false
 
 # Initial conditions
 # Field order: phi h chi
-initial_amplitudes = 4.80234e18 0.0 0.0
-initial_momenta = -1.75455e31 0.0 0.0
+initial_amplitudes = 2.32106e18 0.0 0.0
+initial_momenta = -2.30234e-31 0.0 0.0
 ICtype_S = Default
 
 # Optional external scalar power spectra
@@ -42,13 +42,13 @@ ext_PS2 = None
 
 # Model parameters
 M = 1.2175e19 # in GeV
-Lambda4 = 5.47808e64 # in GeV^4
-lambda = 1e-12 # corresponds to resonance parameter q = 401.095
-sigma = 1e7 # in GeV (q3 = 9.18729)
-lambdah = 1.73917e-12 # fullfills condition lambda/4 = sigma^2 / omega^2
+Lambda4 = 2.64752e64 # in GeV^4
+lambda = 1e-7 # 
+sigma = 1.1e8 # in GeV
+lambdah = 6.77461e-11 # 
 masspNGB = 0.0
 
 # Scalar derivative coupling
 # Enabled coupling is (phi, chi), so this file expects one value.
 # The value is available to model-defined derivativeCouplingFunction hooks.
-lambda_DerivativeCoupling = 1000000
+lambda_DerivativeCoupling = 0.2

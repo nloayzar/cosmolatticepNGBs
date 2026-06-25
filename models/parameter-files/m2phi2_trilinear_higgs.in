@@ -1,0 +1,45 @@
+# Parameter file for m2phi2_trilinear_higgs
+
+# Output
+outputfile = ./test_m2phi2_trilinear_RK2/
+print_headers = false
+overwriteFiles = true
+
+# Evolution
+expansion = true
+fixedBackground = false
+evolver = RK2
+
+# Lattice
+N = 64
+kIR = 0.25
+dt = 0.01
+
+# Times
+tMax = 80
+tOutputFreq = .1
+tOutputInfreq = 2
+
+# Spectra options
+PS_type = 1
+PS_version = 1
+kCutOff = 100
+baseSeed=1234
+
+# Gravitational waves
+withGWs = false
+
+# Initial conditions
+# Field order: phi h
+initial_amplitudes = 4.80234e18 0.0
+initial_momenta = -1.75455e31 0.0
+ICtype_S = Default
+
+# Optional external scalar power spectra
+ext_PS0 = None
+ext_PS1 = None
+
+# Model parameters
+mass = 1.41894e13 # in GeV
+sigma = 8.20802e8 # in GeV (q3 = 10)
+lambdah = 3.3461e-9

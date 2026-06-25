@@ -1,7 +1,7 @@
-# Parameter file for tanhp4_higgs_pNGB_Poly2
+# Parameter file for m2phi2_higgs_pNGB_Poly2
 
 # Output
-outputfile = ./test_InftyLambda/
+outputfile = ./test_m2phi2/
 print_headers = false
 overwriteFiles = true
 
@@ -13,7 +13,7 @@ evolver = RK2
 # Lattice
 N = 64
 kIR = 0.25
-dt = 0.0001
+dt = 0.01
 
 # Times
 tMax = 40
@@ -31,8 +31,8 @@ withGWs = false
 
 # Initial conditions
 # Field order: phi h chi
-initial_amplitudes = 4.80234e18 0.0 0.0
-initial_momenta = -1.75455e31 0.0 0.0
+initial_amplitudes = 2.45297e18 0.0 0.0
+initial_momenta = -2.46107e31 0.0 0.0
 ICtype_S = Default
 
 # Optional external scalar power spectra
@@ -41,12 +41,13 @@ ext_PS1 = None
 ext_PS2 = None
 
 # Model parameters
-M = 1.2175e19 # in GeV
-Lambda4 = 5.47808e64 # in GeV^4
-lambda = 1e-12 # corresponds to resonance parameter q = 401.095
-sigma = 1e7 # in GeV (q3 = 9.18729)
-lambdah = 1.73917e-12 # fullfills condition lambda/4 = sigma^2 / omega^2
-masspNGB = 0.0
+ mass = 1.41894e13
+  lambda = 1e-15
+  sigma = 8.20802e8 # in GeV (q3 = 10)
+  lambdah = 1.0e-8
+  masspNGB = 0.0
+  
+
 
 # Scalar derivative coupling
 # Enabled coupling is (phi, chi), so this file expects one value.
